@@ -1,0 +1,42 @@
+{% extends "layout.html.twig" %}
+
+{% form_theme form 'bootstrap_3_layout.html.twig' %}
+
+
+{% block page_title %}
+    Rédiger un Article
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/Dropify/0.2.2/css/dropify.min.css" rel="stylesheet" />
+    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content%}
+    <div class="col-md-8 col-sm-12">
+        <h3>Rédiger un Article</h3>
+        {{ form(form, {attr:{novalidate: 'novalidate' }}) }}
+    </div>
+     {#{{ render(controller('App\\Controller\TechNews\FrontController::sidebar')) }}#}
+     {% include 'component/_sidebar.html.twig' %}
+    </div>
+{% endblock %}
+
+
+{% block final_javascript %}
+<script src="https://cdn.ckeditor.com/4.11.1/standard/ckeditor.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Dropify/0.2.2/js/dropify.min.js"></script>
+<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+<script>
+    CKEDITOR.replace( 'form[contenu]' );
+    $('.dropify').dropify({
+        messages: {
+            default: 'Glissez-d&eacute;posez un fichier ici ou cliquez',
+            replace: 'Glissez-d&eacute;posez un fichier ou cliquez pour remplacer',
+            remove:  'Supprimer',
+            error:   'D&eacute;sol&eacute;, le fichier est trop volumineux'
+        }
+    });
+</script>
+{% endblock %}
