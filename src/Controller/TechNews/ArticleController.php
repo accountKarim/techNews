@@ -2,23 +2,21 @@
 
 namespace App\Controller\TechNews;
 
+use App\Controller\HelperTrait;
 use App\Entity\Article;
 use App\Entity\Categorie;
 use App\Entity\Membre;
-use Doctrine\Common\Annotations\Annotation\Attribute;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\FileType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class ArticleController extends AbstractController
 {
+
+    use HelperTrait;
 
     /**
      * Démonstration de l'ajout d'un Article
@@ -102,70 +100,54 @@ class ArticleController extends AbstractController
 
 
         # Creation du Formulaire
-        $form = $this->createFormBuilder($article)
-            ->add('titre', TextType::class, [
-                'required' => true,
-                'label' => "Titre de l'Article",
-                'attr' => [
-                    'placeholder' => "Titre de l'Article"
-                ]])
+        $form = $this->createForm('App\form\ArticleFormType', $article)
 
-
-            ->add('categorie', EntityType::class, [
-                'class' => Categorie::class,
-                'choice_label' => 'nom',
-                'expanded' => false,
-                'multiple' => false,
-                'label' => false
-            ])
-
-
-            ->add('contenu', TextareaType::class, [
-                'required' => true,
-                'label' => false,
-            ])
-
-
-
-            ->add('featuredimage', FileType::class, [
-                'attr' => [
-                    'class' => "dropify"
-                ]
-            ])
-
-
-            ->add('special', CheckboxType::class, [
-                'required' => false,
-                'attr' => [
-                    'data-toggle' => 'toggle',
-                    'data-on' => 'Oui',
-                    'data-off' => 'Non'
-                ]
-            ])
-
-
-
-            ->add('spotlight', CheckboxType::class, [
-                'required' => false,
-                'attr' => [
-                    'data-toggle' => 'toggle',
-                    'data-on' => 'Oui',
-                    'data-off' => 'Non'
-                ]
-            ])
-
-
-            ->add('submit', SubmitType::class, [
-                'label' => 'Publier mon Article'
-            ])
-            ->getForm()
+            ->handleRequest($request);
         ;
 
-        # traitement des donnees POST
-        $form->handleRequest($request);
-
         if($form->isSubmitted() && $form->isValid()) {
-            dump($article);
+
+            // $file stores the uploaded PDF file
+            /** @var UploadedFile $featuredImage */
+            $featuredImage = $article->getFeaturedImage();
+
+            $fileName = $this->slugify($article->getTitre())
+                . '.' . $featuredImage->guessExtension();
+
+            // Move the file to the directory where brochures are stored
+            try {
+                $featuredImage->move(
+                    $this->getParameter('articles.assets_dir'),
+                    $fileName
+                );
+            } catch (FileException $e) {
+                // ... handle exception if something happens during file upload
+            }
+
+            // updates the 'brochure' property to store the PDF file name
+            // instead of its contents
+            $article->setFeaturedImage($fileName);
+
+            # Mise à jour du slug
+            $article->setSlug($this->slugify($article->getTitre()));
+
+            // ... persist the $product variable or any other work
+
+            # Sauvgarde en DBB
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($article);
+            $em->flush();
+
+            # Notification
+            $this->addFlash("notice", "Votre article à bien été ajouter");
+
+            # Redirection
+            return $this->redirectToRoute("front_article", [
+               'categories' => $article->getCategorie()->getSlug(),
+               'slug' => $article->getSlug(),
+               'id' => $article->getId()
+            ]);
+
         }
 
         # Affichage dans la vue
