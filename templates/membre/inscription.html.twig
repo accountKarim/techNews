@@ -1,0 +1,17 @@
+{% extends "layout.html.twig" %}
+
+{% form_theme form 'bootstrap_3_layout.html.twig' %}
+
+
+{% block page_title %}
+    Créer un compte
+{% endblock %}
+
+{% block content%}
+    <div class="col-md-8 col-sm-12">
+        <h3>Rédiger un Article</h3>
+        {{ form(form, {attr:{novalidate: 'novalidate' }}) }}
+    </div>
+    {% include 'component/_sidebar.html.twig' %}
+    </div>
+{% endblock %}
