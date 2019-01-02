@@ -85,5 +85,10 @@ class ArticleFormType extends AbstractType
         ]);
     }
 
+    public function getBlockPrefix()
+    {
+        return 'form';
+    }
+
 
 }

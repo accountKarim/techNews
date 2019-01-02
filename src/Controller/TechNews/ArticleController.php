@@ -90,8 +90,7 @@ class ArticleController extends AbstractController
         # Recuperation d'un Membre
         $membre = $this-> getDoctrine()
             ->getRepository(Membre::class)
-            ->find(1);
-
+            ->find(7);
 
         # Création d'un nouvel Article
         $article = new Article();
@@ -117,7 +116,7 @@ class ArticleController extends AbstractController
             // Move the file to the directory where brochures are stored
             try {
                 $featuredImage->move(
-                    $this->getParameter('articles.assets_dir'),
+                    $this->getParameter('articlesassets_dir'),
                     $fileName
                 );
             } catch (FileException $e) {
@@ -143,7 +142,7 @@ class ArticleController extends AbstractController
 
             # Redirection
             return $this->redirectToRoute("front_article", [
-               'categories' => $article->getCategorie()->getSlug(),
+               'categorie' => $article->getCategorie()->getSlug(),
                'slug' => $article->getSlug(),
                'id' => $article->getId()
             ]);

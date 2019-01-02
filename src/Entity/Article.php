@@ -43,7 +43,6 @@ class Article
      * @ORM\Column(type="string", length=255)
      * @Assert\image(
      *     mimeTypesMessage="Verifier le format de l'image",
-     *     maxSize="100000", maxSizeMessage="Votre image et trop grande"
      * )
      */
     private $featuredImage;
